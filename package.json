@@ -1,0 +1,13 @@
+{
+  "name": "gandalf-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Personal assistant dashboard: email, calendar, and wheel trading positions. Deployed on Netlify with serverless functions for Gmail/Calendar OAuth and Supabase for wheel data.",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^2.8.2"
+  },
+  "_comment_ignore_lockfile": "If a stale package-lock.json/node_modules exists alongside this file from earlier drafts, delete them before installing."
+}

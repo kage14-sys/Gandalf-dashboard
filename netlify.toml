@@ -1,0 +1,10 @@
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# Every function declares its own path via `export const config = { path: "..." }`
+# (see netlify/functions/*.mts), so no redirects are needed here. The Google
+# OAuth redirect URI registered in Google Cloud Console is /auth/google/callback.

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gandalf — Assistant Dashboard</title>
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #f6f7f9;
+    color: #1a1d23;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 14px;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 20px 20px 40px; }
+  .top-row { display: flex; justify-content: space-between; align-items: baseline; }
+  h1 { font-size: 20px; margin: 0 0 2px; }
+  .sub { color: #6b7280; font-size: 13px; margin-bottom: 18px; }
+  .grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+    padding: 16px; margin-bottom: 16px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 12px; display: flex; align-items: center; justify-content: space-between; }
+  .card h2 .cnt { font-size: 12px; color: #6b7280; font-weight: 400; }
+  .full { grid-column: 1 / -1; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .stat { flex: 1; min-width: 130px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; }
+  .stat .label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
+  .stat .value { font-size: 18px; font-weight: 600; margin-top: 2px; }
+  .progress-bar { height: 8px; background: #eee; border-radius: 6px; overflow: hidden; margin-top: 6px; }
+  .progress-fill { height: 100%; background: #2563eb; }
+  .alert {
+    background: #fff4ed; border: 1px solid #fed7aa; border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 16px; font-size: 13px;
+  }
+  .alert.none { background: #f0fdf4; border-color: #bbf7d0; }
+  .alert.info { background: #eff6ff; border-color: #bfdbfe; }
+  .alert b { color: #b45309; }
+  .alert.none b { color: #15803d; }
+  .alert.info b { color: #1d4ed8; }
+  .wheel-card {
+    border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px;
+  }
+  .wheel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .ticker { font-weight: 700; font-size: 15px; }
+  .leg-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 3px 0; color: #374151; flex-wrap: wrap; }
+  .badge { font-size: 10.5px; padding: 1px 6px; border-radius: 5px; font-weight: 600; }
+  .badge.CSP { background: #dbeafe; color: #1d4ed8; }
+  .badge.CC { background: #fef3c7; color: #92400e; }
+  .badge.STOCK { background: #e5e7eb; color: #374151; }
+  .dte { font-size: 10.5px; padding: 1px 6px; border-radius: 5px; font-weight: 600; }
+  .dte.red { background: #fee2e2; color: #b91c1c; }
+  .dte.orange { background: #ffedd5; color: #c2410c; }
+  .dte.green { background: #dcfce7; color: #15803d; }
+  .empty { color: #9ca3af; font-size: 13px; padding: 8px 0; }
+  .ev-row { padding: 7px 0; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+  .ev-row:last-child { border-bottom: none; }
+  .ev-day { font-size: 11px; color: #6b7280; font-weight: 600; text-transform: uppercase; margin-top: 10px; }
+  .ev-title { font-weight: 500; }
+  .ev-time { color: #6b7280; font-size: 12px; }
+  .mail-row { border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .mail-top { display: flex; justify-content: space-between; gap: 10px; }
+  .mail-sender { font-weight: 600; font-size: 13px; }
+  .mail-time { color: #9ca3af; font-size: 11.5px; white-space: nowrap; }
+  .mail-subject { font-size: 13px; margin: 2px 0; }
+  .mail-snippet { color: #6b7280; font-size: 12.5px; }
+  .btn {
+    border: 1px solid #d1d5db; background: #fff; border-radius: 6px; padding: 4px 10px;
+    font-size: 12px; cursor: pointer; color: #1a1d23;
+  }
+  .btn:hover { background: #f3f4f6; }
+  .btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .btn.primary:hover { background: #1d4ed8; }
+  .btn:disabled { opacity: .5; cursor: default; }
+  .link-btn {
+    border: none; background: none; color: #6b7280; font-size: 11.5px; cursor: pointer; padding: 0;
+    text-decoration: underline;
+  }
+  .link-btn:hover { color: #2563eb; }
+  .edit-box { margin-top: 8px; display: none; background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 8px; }
+  .edit-box input[type="text"] { width: 100%; font-family: inherit; font-size: 12.5px; border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; }
+  .edit-box input[type="date"], .edit-box input[type="time"] { font-size: 12.5px; border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 6px; }
+  .edit-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .saved-msg { color: #15803d; font-size: 12px; margin-left: 6px; }
+  .add-event-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .add-event-row input[type="text"] { flex: 1; min-width: 100px; font-family: inherit; font-size: 12.5px; border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; }
+  .add-event-row input[type="date"], .add-event-row input[type="time"] { font-size: 12.5px; border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 6px; }
+  .loading { color: #9ca3af; font-size: 13px; padding: 20px 0; text-align: center; }
+  .err { color: #b91c1c; font-size: 12.5px; }
+
+  /* Password gate */
+  #gateOverlay {
+    position: fixed; inset: 0; background: #f6f7f9; display: flex;
+    align-items: center; justify-content: center; z-index: 100;
+  }
+  .gate-card {
+    background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 28px;
+    width: 320px; text-align: center;
+  }
+  .gate-card h1 { font-size: 17px; margin-bottom: 6px; }
+  .gate-card p { color: #6b7280; font-size: 13px; margin-bottom: 16px; }
+  .gate-card input[type="password"] {
+    width: 100%; padding: 8px 10px; font-size: 14px; border: 1px solid #d1d5db;
+    border-radius: 6px; margin-bottom: 10px;
+  }
+  .gate-card .err { min-height: 16px; margin-top: 8px; }
+  #dashboardRoot { display: none; }
+</style>
+</head>
+<body>
+
+<div id="gateOverlay">
+  <div class="gate-card">
+    <h1>Gandalf</h1>
+    <p>Enter the password to open your dashboard.</p>
+    <input type="password" id="gatePassword" placeholder="Password" autofocus />
+    <button class="btn primary" style="width:100%;" onclick="submitPassword()">Unlock</button>
+    <div class="err" id="gateError"></div>
+  </div>
+</div>
+
+<div id="dashboardRoot">
+  <div class="wrap">
+    <div class="top-row">
+      <div>
+        <h1>Kurt's Assistant Dashboard</h1>
+        <div class="sub" id="lastUpdated">Loading…</div>
+      </div>
+      <button class="link-btn" onclick="doLogout()">Log out</button>
+    </div>
+
+    <div id="alertBox" class="alert" style="display:none;"></div>
+
+    <div class="card full">
+      <h2>Account Snapshot</h2>
+      <div id="acctSnapshot" class="loading">Loading account data…</div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Wheel Positions <span class="cnt" id="wheelCount"></span></h2>
+        <div style="margin-bottom:10px;">
+          <button class="btn" id="syncBtn" onclick="syncExpirations()">Sync expirations to calendar</button>
+          <span class="saved-msg" id="syncMsg"></span>
+        </div>
+        <div id="wheelList" class="loading">Loading positions…</div>
+      </div>
+      <div class="card">
+        <h2>Calendar — Next 7 Days</h2>
+        <div id="calGoogleGate"></div>
+        <div class="add-event-row">
+          <input type="text" id="newEvTitle" placeholder="New event title">
+          <input type="date" id="newEvDate">
+          <input type="time" id="newEvTime">
+          <button class="btn primary" onclick="addEvent()">Add</button>
+        </div>
+        <span class="saved-msg" id="addEvMsg"></span>
+        <div id="calList" class="loading">Loading calendar…</div>
+      </div>
+    </div>
+
+    <div class="card full">
+      <h2>Inbox — Unread <span class="cnt" id="mailCount"></span></h2>
+      <div id="mailGoogleGate"></div>
+      <div id="mailList" class="loading">Loading inbox…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let calEvents = [];
+let wheelDataCache = null;
+let mailThreads = [];
+
+function esc(s){ return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function money(n){ return "$" + Math.round(n).toLocaleString(); }
+function daysBetween(dateStr){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(dateStr + "T00:00:00");
+  return Math.round((d - today) / 86400000);
+}
+function dteClass(dte){
+  if (dte <= 3) return "red";
+  if (dte <= 7) return "orange";
+  return "green";
+}
+function timeAgo(iso){
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const h = diffMs / 3600000;
+  if (h < 1) return Math.max(1, Math.round(h*60)) + "m ago";
+  if (h < 24) return Math.round(h) + "h ago";
+  return Math.round(h/24) + "d ago";
+}
+async function api(path, opts){
+  const res = await fetch(path, Object.assign({ credentials: "same-origin" }, opts || {}));
+  let json = null;
+  try { json = await res.json(); } catch(e) {}
+  return { ok: res.ok, status: res.status, data: json };
+}
+function googleGateHtml(){
+  return `<div class="alert info" style="margin-bottom:12px;">
+    <b>Google account not connected.</b> <a href="/auth/google/start" class="btn primary" style="text-decoration:none;display:inline-block;margin-left:6px;">Connect Google Account</a>
+  </div>`;
+}
+
+/* ---------- Password gate ---------- */
+async function checkSession(){
+  const { data } = await api("/api/session-check");
+  if (data && data.authenticated) {
+    document.getElementById("gateOverlay").style.display = "none";
+    document.getElementById("dashboardRoot").style.display = "block";
+    init();
+  } else {
+    document.getElementById("gateOverlay").style.display = "flex";
+  }
+}
+async function submitPassword(){
+  const pw = document.getElementById("gatePassword").value;
+  const errEl = document.getElementById("gateError");
+  errEl.textContent = "";
+  const { ok, data } = await api("/api/login", { method: "POST", body: JSON.stringify({ password: pw }) });
+  if (ok) {
+    checkSession();
+  } else {
+    errEl.textContent = (data && data.error) || "Incorrect password.";
+  }
+}
+document.getElementById("gatePassword").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") submitPassword();
+});
+async function doLogout(){
+  await api("/api/logout", { method: "POST" });
+  location.reload();
+}
+
+/* ---------- Wheel data ---------- */
+async function loadWheelData(){
+  const el = document.getElementById("wheelList");
+  const acctEl = document.getElementById("acctSnapshot");
+  const { ok, data } = await api("/api/wheel-data");
+  if (!ok) {
+    el.innerHTML = '<div class="err">Could not load wheel data: ' + esc((data && data.error) || "unknown error") + '</div>';
+    acctEl.innerHTML = '<div class="err">Could not load account data.</div>';
+    return;
+  }
+  wheelDataCache = data.data || {};
+  renderAccount(wheelDataCache.acctSettings || {}, wheelDataCache.wheels || []);
+  renderWheels(wheelDataCache.wheels || []);
+}
+
+function renderAccount(acct, wheels){
+  const acctEl = document.getElementById("acctSnapshot");
+  const goal = acct.goal || 1000000;
+  const total = acct.totalBalance || 0;
+  const pct = Math.min(100, Math.round((total/goal)*100));
+
+  const now = new Date();
+  const ym = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+  let monthPremium = 0, realizedAllTime = 0;
+  wheels.forEach(w => (w.legs||[]).forEach(l => {
+    if (l.type === "CSP" || l.type === "CC") {
+      const credit = (l.premium||0) * (l.contracts||1) * 100;
+      if (l.openDate && l.openDate.startsWith(ym)) monthPremium += credit;
+      if (l.status === "closed") realizedAllTime += credit - ((l.buybackPrice||0) * (l.contracts||1) * 100);
+    }
+  }));
+  const monthTarget = acct.monthlyPremiumTarget || 0;
+  const monthPct = monthTarget ? Math.min(100, Math.round((monthPremium/monthTarget)*100)) : 0;
+
+  acctEl.innerHTML = `
+    <div class="stat-row">
+      <div class="stat">
+        <div class="label">${esc(acct.goalLabel || "Goal")}</div>
+        <div class="value">${money(total)} <span style="font-size:12px;color:#6b7280;">/ ${money(goal)}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="stat">
+        <div class="label">Cash Balance</div>
+        <div class="value">${money(acct.cashBalance||0)}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Premium This Month</div>
+        <div class="value">${money(monthPremium)} <span style="font-size:12px;color:#6b7280;">/ ${money(monthTarget)}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${monthPct}%; background:#16a34a;"></div></div>
+      </div>
+      <div class="stat">
+        <div class="label">Realized Premium (all-time)</div>
+        <div class="value">${money(realizedAllTime)}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWheels(wheels){
+  const el = document.getElementById("wheelList");
+  const open = wheels.filter(w => w.status === "open");
+  document.getElementById("wheelCount").textContent = open.length + " open";
+
+  let soon = [];
+  wheels.forEach(w => (w.legs||[]).forEach(l => {
+    if (l.status === "open" && (l.type === "CSP" || l.type === "CC") && l.expiry) {
+      const dte = daysBetween(l.expiry);
+      if (dte <= 7) soon.push({ticker: w.ticker, type: l.type, strike: l.strike, expiry: l.expiry, dte});
+    }
+  }));
+  soon.sort((a,b) => a.dte - b.dte);
+  const alertBox = document.getElementById("alertBox");
+  if (soon.length) {
+    alertBox.style.display = "block";
+    alertBox.className = "alert";
+    alertBox.innerHTML = "<b>Expiring within 7 days:</b> " + soon.map(s =>
+      `${esc(s.ticker)} ${esc(s.type)} $${s.strike} (${s.dte}d, ${esc(s.expiry)})`
+    ).join(" &nbsp;•&nbsp; ");
+  } else {
+    alertBox.style.display = "block";
+    alertBox.className = "alert none";
+    alertBox.innerHTML = "<b>No positions expiring in the next 7 days.</b>";
+  }
+
+  if (!open.length) { el.innerHTML = '<div class="empty">No open wheels.</div>'; return; }
+
+  el.innerHTML = open.map(w => {
+    const openLegs = (w.legs||[]).filter(l => l.status === "open");
+    const legsHtml = openLegs.map(l => {
+      if (l.type === "STOCK") {
+        return `<div class="leg-row"><span class="badge STOCK">STOCK</span> ${l.shares} sh @ ${money(l.costBasis||0)} cost basis</div>`;
+      }
+      const dte = l.expiry ? daysBetween(l.expiry) : null;
+      const dteBadge = dte !== null ? `<span class="dte ${dteClass(dte)}">${dte}d · ${esc(l.expiry)}</span>` : "";
+      return `<div class="leg-row"><span class="badge ${esc(l.type)}">${esc(l.type)}</span> $${l.strike} strike · ${l.contracts}x · premium ${money(l.premium||0)} ${dteBadge}</div>`;
+    }).join("");
+    const closedCount = (w.legs||[]).filter(l => l.status === "closed").length;
+    return `
+      <div class="wheel-card">
+        <div class="wheel-head">
+          <div><span class="ticker">${esc(w.ticker)}</span></div>
+          <span style="color:#9ca3af;font-size:11.5px;">${closedCount} closed leg${closedCount===1?"":"s"}</span>
+        </div>
+        ${legsHtml || '<div class="empty">No open legs</div>'}
+      </div>
+    `;
+  }).join("");
+}
+
+async function syncExpirations(){
+  const btn = document.getElementById("syncBtn");
+  const msg = document.getElementById("syncMsg");
+  btn.disabled = true; btn.textContent = "Syncing…";
+  const { ok, status, data } = await api("/api/sync-expirations", { method: "POST" });
+  btn.disabled = false; btn.textContent = "Sync expirations to calendar";
+  if (!ok) {
+    if (status === 409) { msg.textContent = "Connect your Google account first."; }
+    else { msg.textContent = "Sync failed: " + ((data && data.error) || "unknown error"); }
+    return;
+  }
+  msg.textContent = `Synced: ${data.created} added, ${data.skipped} already on calendar${data.failed ? ", " + data.failed + " failed" : ""}.`;
+  loadCalendar();
+}
+
+/* ---------- Calendar ---------- */
+async function loadCalendar(){
+  const el = document.getElementById("calList");
+  const gate = document.getElementById("calGoogleGate");
+  el.innerHTML = '<div class="loading">Loading calendar…</div>';
+  const start = new Date(); start.setHours(0,0,0,0);
+  const end = new Date(start.getTime() + 7*86400000);
+  const { ok, status, data } = await api(`/api/calendar-list?startTime=${encodeURIComponent(start.toISOString())}&endTime=${encodeURIComponent(end.toISOString())}`);
+  if (!ok) {
+    if (status === 409) { gate.innerHTML = googleGateHtml(); el.innerHTML = ""; }
+    else { el.innerHTML = '<div class="err">Could not load calendar: ' + esc((data && data.error) || "unknown error") + '</div>'; }
+    return;
+  }
+  gate.innerHTML = "";
+  calEvents = (data.events || []).filter(e => e.status !== "cancelled");
+  if (!calEvents.length) { el.innerHTML = '<div class="empty">No events in the next 7 days.</div>'; return; }
+  let lastDay = "";
+  el.innerHTML = calEvents.map((e, idx) => {
+    const startVal = e.start.dateTime || e.start.date;
+    const d = new Date(startVal);
+    const dayLabel = d.toLocaleDateString(undefined, {weekday:"short", month:"short", day:"numeric"});
+    const timeLabel = e.start.dateTime ? d.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"}) : "All day";
+    let dayHtml = "";
+    if (dayLabel !== lastDay) { dayHtml = `<div class="ev-day">${dayLabel}</div>`; lastDay = dayLabel; }
+    return `${dayHtml}<div class="ev-row">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div>
+          <div class="ev-title">${esc(e.summary||"(no title)")}</div>
+          <div class="ev-time">${timeLabel}</div>
+        </div>
+        <div style="display:flex;gap:8px;white-space:nowrap;">
+          <button class="link-btn" onclick="startEditEvent(${idx})">Edit</button>
+          <button class="link-btn" onclick="deleteEventRow(${idx})">Delete</button>
+        </div>
+      </div>
+      <div class="edit-box" id="edit-box-${idx}"></div>
+    </div>`;
+  }).join("");
+}
+
+function toLocalDateStr(d){
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function toLocalTimeStr(d){
+  return String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+}
+
+function startEditEvent(idx){
+  const e = calEvents[idx];
+  const box = document.getElementById("edit-box-" + idx);
+  const isOpen = box.style.display === "block";
+  if (isOpen) { box.style.display = "none"; return; }
+  const isAllDay = !e.start.dateTime;
+  const startVal = e.start.dateTime || e.start.date;
+  const d = new Date(startVal);
+  box.innerHTML = `
+    <input type="text" id="edit-title-${idx}" value="${esc(e.summary||"")}">
+    <div class="edit-row">
+      <input type="date" id="edit-date-${idx}" value="${toLocalDateStr(d)}">
+      <input type="time" id="edit-time-${idx}" value="${toLocalTimeStr(d)}" ${isAllDay ? "disabled" : ""}>
+      <label style="font-size:11.5px;color:#374151;"><input type="checkbox" id="edit-allday-${idx}" ${isAllDay ? "checked" : ""} onchange="document.getElementById('edit-time-${idx}').disabled = this.checked;"> All day</label>
+      <button class="btn primary" onclick="saveEditEvent(${idx})">Save</button>
+      <button class="btn" onclick="document.getElementById('edit-box-${idx}').style.display='none';">Cancel</button>
+      <span class="saved-msg" id="edit-saved-${idx}"></span>
+    </div>
+  `;
+  box.style.display = "block";
+}
+
+async function saveEditEvent(idx){
+  const e = calEvents[idx];
+  const savedMsg = document.getElementById("edit-saved-" + idx);
+  const title = document.getElementById("edit-title-" + idx).value.trim() || "(no title)";
+  const dateVal = document.getElementById("edit-date-" + idx).value;
+  const timeVal = document.getElementById("edit-time-" + idx).value || "09:00";
+  const allDay = document.getElementById("edit-allday-" + idx).checked;
+  if (!dateVal) { savedMsg.textContent = "Pick a date."; return; }
+  let startTime, endTime;
+  if (allDay) {
+    startTime = dateVal + "T00:00:00";
+    endTime = new Date(new Date(dateVal + "T00:00:00").getTime() + 86400000).toISOString();
+  } else {
+    const start = new Date(dateVal + "T" + timeVal + ":00");
+    startTime = start.toISOString();
+    endTime = new Date(start.getTime() + 3600000).toISOString();
+  }
+  savedMsg.textContent = "Saving…";
+  const { ok } = await api("/api/calendar-update", {
+    method: "POST",
+    body: JSON.stringify({ eventId: e.id, summary: title, startTime, endTime, allDay })
+  });
+  if (ok) { savedMsg.textContent = "Saved ✓"; setTimeout(loadCalendar, 500); }
+  else { savedMsg.textContent = "Failed to save."; }
+}
+
+async function deleteEventRow(idx){
+  const e = calEvents[idx];
+  if (!confirm(`Delete "${e.summary || "(no title)"}"?`)) return;
+  const { ok } = await api("/api/calendar-delete", { method: "POST", body: JSON.stringify({ eventId: e.id }) });
+  if (ok) loadCalendar();
+  else alert("Failed to delete event.");
+}
+
+async function addEvent(){
+  const msg = document.getElementById("addEvMsg");
+  const title = document.getElementById("newEvTitle").value.trim();
+  const dateVal = document.getElementById("newEvDate").value;
+  const timeVal = document.getElementById("newEvTime").value;
+  if (!title || !dateVal) { msg.textContent = "Title and date are required."; return; }
+  let startTime, endTime, allDay = false;
+  if (timeVal) {
+    const start = new Date(dateVal + "T" + timeVal + ":00");
+    startTime = start.toISOString();
+    endTime = new Date(start.getTime() + 3600000).toISOString();
+  } else {
+    allDay = true;
+    startTime = dateVal + "T00:00:00";
+    endTime = new Date(new Date(dateVal + "T00:00:00").getTime() + 86400000).toISOString();
+  }
+  msg.textContent = "Adding…";
+  const { ok } = await api("/api/calendar-create", { method: "POST", body: JSON.stringify({ summary: title, startTime, endTime, allDay }) });
+  if (ok) {
+    msg.textContent = "Added ✓";
+    document.getElementById("newEvTitle").value = "";
+    document.getElementById("newEvDate").value = "";
+    document.getElementById("newEvTime").value = "";
+    loadCalendar();
+  } else {
+    msg.textContent = "Failed to add event.";
+  }
+}
+
+/* ---------- Mail ---------- */
+async function loadMail(){
+  const el = document.getElementById("mailList");
+  const gate = document.getElementById("mailGoogleGate");
+  const { ok, status, data } = await api("/api/gmail-list");
+  if (!ok) {
+    if (status === 409) { gate.innerHTML = googleGateHtml(); el.innerHTML = ""; document.getElementById("mailCount").textContent = ""; }
+    else { el.innerHTML = '<div class="err">Could not load inbox: ' + esc((data && data.error) || "unknown error") + '</div>'; }
+    return;
+  }
+  gate.innerHTML = "";
+  mailThreads = data.threads || [];
+  document.getElementById("mailCount").textContent = mailThreads.length + (data.resultCountEstimate ? " of ~" + data.resultCountEstimate : "");
+  if (!mailThreads.length) { el.innerHTML = '<div class="empty">Inbox zero — nothing unread.</div>'; return; }
+  el.innerHTML = mailThreads.map((m, idx) => `
+    <div class="mail-row" id="mail-row-${idx}">
+      <div class="mail-top">
+        <div class="mail-sender">${esc(m.sender)}</div>
+        <div class="mail-time">${timeAgo(m.date)}</div>
+      </div>
+      <div class="mail-subject">${esc(m.subject||"(no subject)")}</div>
+      <div class="mail-snippet">${esc(m.snippet||"")}</div>
+      <button class="link-btn" style="margin-top:6px;" onclick="deleteEmail(${idx})">Delete</button>
+      <span class="saved-msg" id="mail-msg-${idx}"></span>
+    </div>
+  `).join("");
+}
+
+async function deleteEmail(idx){
+  const m = mailThreads[idx];
+  const msgEl = document.getElementById("mail-msg-" + idx);
+  if (!confirm(`Move this email to Trash?\n\n${m.subject || "(no subject)"}`)) return;
+  msgEl.textContent = "Deleting…";
+  const { ok } = await api("/api/gmail-trash", { method: "POST", body: JSON.stringify({ threadId: m.id }) });
+  if (ok) {
+    const row = document.getElementById("mail-row-" + idx);
+    if (row) row.remove();
+  } else {
+    msgEl.textContent = "Failed to delete.";
+  }
+}
+
+async function init(){
+  document.getElementById("lastUpdated").textContent = "Refreshed " + new Date().toLocaleString();
+  await Promise.all([loadWheelData(), loadCalendar(), loadMail()]);
+}
+
+checkSession();
+</script>
+</body>
+</html>
