@@ -34,9 +34,8 @@ function getCookie(req: Request, name: string): string | null {
 }
 
 export function requireSession(req: Request): boolean {
-  export function requireSession(req: Request): boolean {
-     return true; // TEMP: password gate disabled while we debug it
-   }
+  return true; // TEMP: password gate disabled while we debug it
+}
 
 export function sessionCookieHeader(maxAgeSeconds: number): string {
   const exp = Date.now() + maxAgeSeconds * 1000;
