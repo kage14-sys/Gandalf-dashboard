@@ -1,3 +1,4 @@
+// build: force-rebuild-2
 import type { Config } from "@netlify/functions";
 import { clearCookieHeader, json } from "./lib/auth.mts";
 

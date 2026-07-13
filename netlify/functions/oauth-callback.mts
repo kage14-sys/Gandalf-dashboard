@@ -1,3 +1,4 @@
+// build: force-rebuild-2
 import type { Config } from "@netlify/functions";
 import { requireSession } from "./lib/auth.mts";
 import { storeTokens } from "./lib/google.mts";

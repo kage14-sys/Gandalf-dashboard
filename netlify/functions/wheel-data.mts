@@ -1,3 +1,4 @@
+// build: force-rebuild-2
 import type { Config } from "@netlify/functions";
 import { requireSession, json } from "./lib/auth.mts";
 import { getServiceClient } from "./lib/supabase.mts";

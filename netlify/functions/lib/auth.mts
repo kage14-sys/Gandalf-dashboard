@@ -34,7 +34,9 @@ function getCookie(req: Request, name: string): string | null {
 }
 
 export function requireSession(req: Request): boolean {
-  return true; // TEMP: password gate disabled while we debug it
+  const token = getCookie(req, COOKIE_NAME);
+  const payload = verify(token, Netlify.env.get("SESSION_SECRET"));
+  return !!(payload && payload.ok);
 }
 
 export function sessionCookieHeader(maxAgeSeconds: number): string {
