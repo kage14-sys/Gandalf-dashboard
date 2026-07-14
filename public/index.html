@@ -203,13 +203,13 @@ async function api(path, opts){
 }
 function googleGateHtml(){
   return `<div class="alert info" style="margin-bottom:12px;">
-    <b>Google account not connected.</b> <a href="/auth/google/start" class="btn primary" style="text-decoration:none;display:inline-block;margin-left:6px;">Connect Google Account</a>
+    <b>Google account not connected.</b> <a href="/.netlify/functions/oauth-start" class="btn primary" style="text-decoration:none;display:inline-block;margin-left:6px;">Connect Google Account</a>
   </div>`;
 }
 
 /* ---------- Password gate ---------- */
 async function checkSession(){
-  const { data } = await api("/api/session-check");
+  const { data } = await api("/.netlify/functions/session-check");
   if (data && data.authenticated) {
     document.getElementById("gateOverlay").style.display = "none";
     document.getElementById("dashboardRoot").style.display = "block";
@@ -222,7 +222,7 @@ async function submitPassword(){
   const pw = document.getElementById("gatePassword").value;
   const errEl = document.getElementById("gateError");
   errEl.textContent = "";
-  const { ok, data } = await api("/api/login", { method: "POST", body: JSON.stringify({ password: pw }) });
+  const { ok, data } = await api("/.netlify/functions/login", { method: "POST", body: JSON.stringify({ password: pw }) });
   if (ok) {
     checkSession();
   } else {
@@ -233,7 +233,7 @@ document.getElementById("gatePassword").addEventListener("keydown", (e) => {
   if (e.key === "Enter") submitPassword();
 });
 async function doLogout(){
-  await api("/api/logout", { method: "POST" });
+  await api("/.netlify/functions/logout", { method: "POST" });
   location.reload();
 }
 
@@ -241,7 +241,7 @@ async function doLogout(){
 async function loadWheelData(){
   const el = document.getElementById("wheelList");
   const acctEl = document.getElementById("acctSnapshot");
-  const { ok, data } = await api("/api/wheel-data");
+  const { ok, data } = await api("/.netlify/functions/wheel-data");
   if (!ok) {
     el.innerHTML = '<div class="err">Could not load wheel data: ' + esc((data && data.error) || "unknown error") + '</div>';
     acctEl.innerHTML = '<div class="err">Could not load account data.</div>';
@@ -350,7 +350,7 @@ async function syncExpirations(){
   const btn = document.getElementById("syncBtn");
   const msg = document.getElementById("syncMsg");
   btn.disabled = true; btn.textContent = "Syncing…";
-  const { ok, status, data } = await api("/api/sync-expirations", { method: "POST" });
+  const { ok, status, data } = await api("/.netlify/functions/sync-expirations", { method: "POST" });
   btn.disabled = false; btn.textContent = "Sync expirations to calendar";
   if (!ok) {
     if (status === 409) { msg.textContent = "Connect your Google account first."; }
@@ -368,7 +368,7 @@ async function loadCalendar(){
   el.innerHTML = '<div class="loading">Loading calendar…</div>';
   const start = new Date(); start.setHours(0,0,0,0);
   const end = new Date(start.getTime() + 7*86400000);
-  const { ok, status, data } = await api(`/api/calendar-list?startTime=${encodeURIComponent(start.toISOString())}&endTime=${encodeURIComponent(end.toISOString())}`);
+  const { ok, status, data } = await api(`/.netlify/functions/calendar-list?startTime=${encodeURIComponent(start.toISOString())}&endTime=${encodeURIComponent(end.toISOString())}`);
   if (!ok) {
     if (status === 409) { gate.innerHTML = googleGateHtml(); el.innerHTML = ""; }
     else { el.innerHTML = '<div class="err">Could not load calendar: ' + esc((data && data.error) || "unknown error") + '</div>'; }
@@ -448,7 +448,7 @@ async function saveEditEvent(idx){
     endTime = new Date(start.getTime() + 3600000).toISOString();
   }
   savedMsg.textContent = "Saving…";
-  const { ok } = await api("/api/calendar-update", {
+  const { ok } = await api("/.netlify/functions/calendar-update", {
     method: "POST",
     body: JSON.stringify({ eventId: e.id, summary: title, startTime, endTime, allDay })
   });
@@ -459,7 +459,7 @@ async function saveEditEvent(idx){
 async function deleteEventRow(idx){
   const e = calEvents[idx];
   if (!confirm(`Delete "${e.summary || "(no title)"}"?`)) return;
-  const { ok } = await api("/api/calendar-delete", { method: "POST", body: JSON.stringify({ eventId: e.id }) });
+  const { ok } = await api("/.netlify/functions/calendar-delete", { method: "POST", body: JSON.stringify({ eventId: e.id }) });
   if (ok) loadCalendar();
   else alert("Failed to delete event.");
 }
@@ -481,7 +481,7 @@ async function addEvent(){
     endTime = new Date(new Date(dateVal + "T00:00:00").getTime() + 86400000).toISOString();
   }
   msg.textContent = "Adding…";
-  const { ok } = await api("/api/calendar-create", { method: "POST", body: JSON.stringify({ summary: title, startTime, endTime, allDay }) });
+  const { ok } = await api("/.netlify/functions/calendar-create", { method: "POST", body: JSON.stringify({ summary: title, startTime, endTime, allDay }) });
   if (ok) {
     msg.textContent = "Added ✓";
     document.getElementById("newEvTitle").value = "";
@@ -497,7 +497,7 @@ async function addEvent(){
 async function loadMail(){
   const el = document.getElementById("mailList");
   const gate = document.getElementById("mailGoogleGate");
-  const { ok, status, data } = await api("/api/gmail-list");
+  const { ok, status, data } = await api("/.netlify/functions/gmail-list");
   if (!ok) {
     if (status === 409) { gate.innerHTML = googleGateHtml(); el.innerHTML = ""; document.getElementById("mailCount").textContent = ""; }
     else { el.innerHTML = '<div class="err">Could not load inbox: ' + esc((data && data.error) || "unknown error") + '</div>'; }
@@ -526,7 +526,7 @@ async function deleteEmail(idx){
   const msgEl = document.getElementById("mail-msg-" + idx);
   if (!confirm(`Move this email to Trash?\n\n${m.subject || "(no subject)"}`)) return;
   msgEl.textContent = "Deleting…";
-  const { ok } = await api("/api/gmail-trash", { method: "POST", body: JSON.stringify({ threadId: m.id }) });
+  const { ok } = await api("/.netlify/functions/gmail-trash", { method: "POST", body: JSON.stringify({ threadId: m.id }) });
   if (ok) {
     const row = document.getElementById("mail-row-" + idx);
     if (row) row.remove();

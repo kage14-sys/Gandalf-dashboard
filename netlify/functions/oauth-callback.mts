@@ -28,7 +28,7 @@ export default async (req: Request) => {
       code,
       client_id: Netlify.env.get("GOOGLE_CLIENT_ID") || "",
       client_secret: Netlify.env.get("GOOGLE_CLIENT_SECRET") || "",
-      redirect_uri: `${siteUrl}/auth/google/callback`,
+      redirect_uri: `${siteUrl}/.netlify/functions/oauth-callback`,
       grant_type: "authorization_code",
     }),
   });

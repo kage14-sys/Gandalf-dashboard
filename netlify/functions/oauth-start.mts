@@ -20,7 +20,7 @@ export default async (req: Request) => {
   }
   const params = new URLSearchParams({
     client_id: clientId,
-    redirect_uri: `${siteUrl}/auth/google/callback`,
+    redirect_uri: `${siteUrl}/.netlify/functions/oauth-callback`,
     response_type: "code",
     access_type: "offline",
     prompt: "consent",
