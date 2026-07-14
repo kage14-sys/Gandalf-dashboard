@@ -1,5 +1,3 @@
-// build: force-rebuild-2
-import type { Config } from "@netlify/functions";
 import { sessionCookieHeader, json } from "./lib/auth.mts";
 
 const THIRTY_DAYS = 60 * 60 * 24 * 30;
@@ -24,5 +22,3 @@ export default async (req: Request) => {
 
   return json({ ok: true }, { headers: { "Set-Cookie": sessionCookieHeader(THIRTY_DAYS) } });
 };
-
-export const config: Config = { path: "/api/login" };

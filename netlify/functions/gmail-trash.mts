@@ -1,5 +1,3 @@
-// build: force-rebuild-2
-import type { Config } from "@netlify/functions";
 import { requireSession, json } from "./lib/auth.mts";
 import { getAccessToken, GoogleNotConnectedError } from "./lib/google.mts";
 
@@ -26,5 +24,3 @@ export default async (req: Request) => {
     return json({ error: e.message }, { status: 500 });
   }
 };
-
-export const config: Config = { path: "/api/gmail-trash" };

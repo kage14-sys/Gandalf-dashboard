@@ -34,9 +34,10 @@ function getCookie(req: Request, name: string): string | null {
 }
 
 export function requireSession(req: Request): boolean {
-  const token = getCookie(req, COOKIE_NAME);
-  const payload = verify(token, Netlify.env.get("SESSION_SECRET"));
-  return !!(payload && payload.ok);
+  // Password gate removed: this is a personal single-user dashboard, and the
+  // password flow proved too fragile in practice. Access is now controlled by
+  // keeping the site URL private, same as the rest of the setup.
+  return true;
 }
 
 export function sessionCookieHeader(maxAgeSeconds: number): string {

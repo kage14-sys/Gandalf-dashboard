@@ -1,5 +1,3 @@
-// build: force-rebuild-2
-import type { Config } from "@netlify/functions";
 import { requireSession } from "./lib/auth.mts";
 
 const SCOPES = [
@@ -31,5 +29,3 @@ export default async (req: Request) => {
     headers: { Location: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}` },
   });
 };
-
-export const config: Config = { path: "/auth/google/start" };

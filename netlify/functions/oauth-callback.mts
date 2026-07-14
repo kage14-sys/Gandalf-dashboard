@@ -1,5 +1,3 @@
-// build: force-rebuild-2
-import type { Config } from "@netlify/functions";
 import { requireSession } from "./lib/auth.mts";
 import { storeTokens } from "./lib/google.mts";
 
@@ -44,5 +42,3 @@ export default async (req: Request) => {
   await storeTokens(tokens);
   return new Response(null, { status: 302, headers: { Location: "/?connected=1" } });
 };
-
-export const config: Config = { path: "/auth/google/callback" };

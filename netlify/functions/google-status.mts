@@ -1,5 +1,3 @@
-// build: force-rebuild-2
-import type { Config } from "@netlify/functions";
 import { requireSession, json } from "./lib/auth.mts";
 import { getStoredTokens } from "./lib/google.mts";
 
@@ -12,5 +10,3 @@ export default async (req: Request) => {
     return json({ connected: false });
   }
 };
-
-export const config: Config = { path: "/api/google-status" };
